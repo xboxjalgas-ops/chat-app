@@ -1,26 +1,26 @@
 const express = require('express');
-const bcrypt = require('bcryptjs'); // Парольді шифрлау үшін
 const app = express();
 
+// Пайдаланушы жіберген JSON мәліметтерін оқу үшін
 app.use(express.json());
 
-// Парольді тексеру функциясы
-const validatePassword = (password) => {
-    // 8 таңба, кемінде 1 сан және 1 әріп
-    const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
-    return regex.test(password);
-};
+// CSS және басқа файлдарды іске қосу үшін (егер public қалтасы болса)
+app.use(express.static('public'));
 
-app.post('/register', async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!validatePassword(password)) {
-        return res.status(400).send("Қате: Пароль 8 таңбадан аспауы керек, сан және әріп болуы шарт!");
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    // Мұнда дерекқорға (database) сақтау коды болады
-    res.send("Тіркелу сәтті өтті!");
+// Негізгі бетті көрсету
+app.get('/', (req, res) => {
+    res.sendFile(__dirname + '/index.html');
 });
 
-app.listen(3000, () => console.log('Сервер 3000 портында істеп тұр'));
+// Render немесе жергілікті портты автоматты анықтау
+const PORT = process.env.PORT || 3000;
+
+// Серверді іске қосу
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Сервер ${PORT} портында сәтті іске қосылды!`);
+});
+
+// Қателерді бақылау (сервер құлап қалмас үшін)
+process.on('uncaughtException', (err) => {
+    console.error('Қате анықталды:', err);
+});
