@@ -1,47 +1,36 @@
-<!DOCTYPE html>
-<html lang="kk">
-<head>
-    <meta charset="UTF-8">
-    <title>Online Game & Chat</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="main-container">
-        <div id="chat-container">
-            <h3>Чат</h3>
-            <ul id="messages"></ul>
-            <div class="input-area">
-                <input id="input" placeholder="Хабарлама...">
-                <button id="send-btn">Жіберу</button>
-            </div>
-        </div>
-        <div id="game-container">
-            <h3>Ойын</h3>
-            <iframe src="games/game.html" width="350" height="400" frameborder="0"></iframe>
-        </div>
-    </div>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const socket = io();
-        const username = prompt("Атыңыз:") || "Қонақ";
-        
-        window.addEventListener('message', (e) => {
-            if (e.data.type === 'game-over') socket.emit('game-win', username);
-        });
+<div class="audio-controls">
+    <button id="recordBtn">🎙️ Жазу</button>
+    <button id="stopBtn" disabled>⏹️ Тоқтату</button>
+</div>
+<audio id="audioPlayback" controls style="display:none;"></audio>
 
-        document.getElementById('send-btn').onclick = () => {
-            const input = document.getElementById('input');
-            if(input.value) {
-                socket.emit('chat message', {user: username, text: input.value});
-                input.value = '';
-            }
-        };
+<script>
+let mediaRecorder;
+let audioChunks = [];
 
-        socket.on('chat message', (data) => {
-            const li = document.createElement('li');
-            li.innerHTML = `<strong>${data.user}</strong>: ${data.text}`;
-            document.getElementById('messages').appendChild(li);
-        });
-    </script>
-</body>
-</html>
+const recordBtn = document.getElementById('recordBtn');
+const stopBtn = document.getElementById('stopBtn');
+
+recordBtn.onclick = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.start();
+    
+    recordBtn.disabled = true;
+    stopBtn.disabled = false;
+
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+        document.getElementById('audioPlayback').src = audioUrl;
+        document.getElementById('audioPlayback').style.display = 'block';
+    };
+};
+
+stopBtn.onclick = () => {
+    mediaRecorder.stop();
+    recordBtn.disabled = false;
+    stopBtn.disabled = true;
+};
+</script>

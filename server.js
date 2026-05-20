@@ -1,22 +1,26 @@
 const express = require('express');
+const bcrypt = require('bcryptjs'); // Парольді шифрлау үшін
 const app = express();
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-const path = require('path');
 
-// Файлдарды ортақ ету
-app.use(express.static(path.join(__dirname)));
+app.use(express.json());
 
-io.on('connection', (socket) => {
-    socket.on('chat message', (data) => {
-        io.emit('chat message', data);
-    });
+// Парольді тексеру функциясы
+const validatePassword = (password) => {
+    // 8 таңба, кемінде 1 сан және 1 әріп
+    const regex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    return regex.test(password);
+};
 
-    socket.on('game-win', (username) => {
-        io.emit('chat message', { user: '🏆 Ойын жүйесі', text: `${username} жеңіске жетті!` });
-    });
+app.post('/register', async (req, res) => {
+    const { email, password } = req.body;
+
+    if (!validatePassword(password)) {
+        return res.status(400).send("Қате: Пароль 8 таңбадан аспауы керек, сан және әріп болуы шарт!");
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // Мұнда дерекқорға (database) сақтау коды болады
+    res.send("Тіркелу сәтті өтті!");
 });
 
-// Хостингтер үшін динамикалық порт
-const PORT = process.env.PORT || 3000;
-http.listen(PORT, () => console.log(`Сервер ${PORT} портында іске қосылды`));
+app.listen(3000, () => console.log('Сервер 3000 портында істеп тұр'));
