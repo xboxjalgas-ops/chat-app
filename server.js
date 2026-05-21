@@ -1,19 +1,24 @@
 const express = require('express');
-const app = express();
 const path = require('path');
+const app = express();
 
-// Файлдарды (html, css) оқитын орта
-app.use(express.static(__dirname));
+// 1. Барлық статикалық файлдарды (CSS, HTML, JS) осы папкадан оқиды
+app.use(express.static(path.join(__dirname)));
 
-// Басты бетті жүктеу
+// 2. Басты бетті көрсету (index.html)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Портты анықтау
+// 3. Render немесе жергілікті портты автоматты анықтау
 const PORT = process.env.PORT || 3000;
 
-// Серверді іске қосу
+// 4. Серверді іске қосу
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Сервер ${PORT} портында сәтті іске қосылды!`);
+});
+
+// Қателерді бақылау (Сервер құлап қалмас үшін)
+process.on('uncaughtException', (err) => {
+    console.error('Қате анықталды:', err);
 });
