@@ -1,26 +1,19 @@
 const express = require('express');
 const app = express();
+const path = require('path');
 
-// Пайдаланушы жіберген JSON мәліметтерін оқу үшін
-app.use(express.json());
+// Файлдарды (html, css) оқитын орта
+app.use(express.static(__dirname));
 
-// CSS және басқа файлдарды іске қосу үшін (егер public қалтасы болса)
-app.use(express.static('public'));
-
-// Негізгі бетті көрсету
+// Басты бетті жүктеу
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Render немесе жергілікті портты автоматты анықтау
+// Портты анықтау
 const PORT = process.env.PORT || 3000;
 
 // Серверді іске қосу
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Сервер ${PORT} портында сәтті іске қосылды!`);
-});
-
-// Қателерді бақылау (сервер құлап қалмас үшін)
-process.on('uncaughtException', (err) => {
-    console.error('Қате анықталды:', err);
 });

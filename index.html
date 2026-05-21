@@ -1,36 +1,35 @@
-<div class="audio-controls">
-    <button id="recordBtn">🎙️ Жазу</button>
-    <button id="stopBtn" disabled>⏹️ Тоқтату</button>
-</div>
-<audio id="audioPlayback" controls style="display:none;"></audio>
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Менің Чатым</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-<script>
-let mediaRecorder;
-let audioChunks = [];
+    <div id="chat-window">
+        </div>
 
-const recordBtn = document.getElementById('recordBtn');
-const stopBtn = document.getElementById('stopBtn');
+    <div class="input-area">
+        <input type="text" id="messageInput" placeholder="Хабарлама жазыңыз...">
+        <button id="sendBtn">Жіберу</button>
+    </div>
 
-recordBtn.onclick = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.start();
-    
-    recordBtn.disabled = true;
-    stopBtn.disabled = false;
-
-    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-    mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-        const audioUrl = URL.createObjectURL(audioBlob);
-        document.getElementById('audioPlayback').src = audioUrl;
-        document.getElementById('audioPlayback').style.display = 'block';
-    };
-};
-
-stopBtn.onclick = () => {
-    mediaRecorder.stop();
-    recordBtn.disabled = false;
-    stopBtn.disabled = true;
-};
-</script>
+    <script>
+        // Жіберу батырмасының логикасы
+        document.getElementById('sendBtn').onclick = () => {
+            const input = document.getElementById('messageInput');
+            const chat = document.getElementById('chat-window');
+            
+            if (input.value.trim() !== "") {
+                const msg = document.createElement('div');
+                msg.className = 'message';
+                msg.textContent = input.value;
+                chat.appendChild(msg);
+                input.value = ""; // Тазарту
+            }
+        };
+    </script>
+</body>
+</html>
